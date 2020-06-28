@@ -1,5 +1,5 @@
-const dotenv = require("dotenv");
-dotenv.config();
+const dotenv = require("dotenv").config();
+// dotenv.config();
 
 const path = require("path");
 const express = require("express");
@@ -9,7 +9,11 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 
 // Require the Aylien npm package
-const aylien = require("aylien_textapi");
+const aylienAPI = require("aylien_textapi");
+const aylien = new aylienAPI({
+  application_id: process.env.API_ID,
+  application_key: process.env.API_KEY,
+});
 
 let json = {
   title: "test json response",
@@ -48,10 +52,24 @@ app.get("/owmMelbourne", (request, response) => {
   });
 });
 
+let port = process.env.PORT;
+
 // designates what port the app will listen to for incoming requests
-app.listen(8081, function () {
-  console.log("Example app listening on port 8081!");
+app.listen(port, function () {
+  console.log(`Example app listening on http://localhost:${port}`);
 });
 
 console.log(`Your API KEY is ${process.env.API_KEY}`);
 console.log(`Your APP ID key is ${process.env.API_ID}`);
+
+aylien.sentiment(
+  {
+    // text: "John is bad!",
+    url: "https://jamesclear.com/creativity",
+  },
+  function (error, response) {
+    if (error === null) {
+      console.log(response);
+    }
+  }
+);
