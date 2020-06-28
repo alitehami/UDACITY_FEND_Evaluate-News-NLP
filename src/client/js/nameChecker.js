@@ -28,7 +28,6 @@ function checkText_isURL(text) {
   }
 }
 
-
 export { checkText_isURL };
 
 /*

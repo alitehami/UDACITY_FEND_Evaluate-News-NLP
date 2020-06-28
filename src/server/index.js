@@ -1,6 +1,13 @@
 const dotenv = require("dotenv").config();
 // dotenv.config();
 
+// Require the Aylien npm package
+const aylienAPI = require("aylien_textapi");
+const { url } = require("inspector");
+const aylien = new aylienAPI({
+  application_id: process.env.API_ID,
+  application_key: process.env.API_KEY,
+});
 const path = require("path");
 const express = require("express");
 const mockAPIResponse = require("./mockAPI.js");
@@ -8,12 +15,6 @@ const owmAPIResponse = require("./owmAPI.js");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 
-// Require the Aylien npm package
-const aylienAPI = require("aylien_textapi");
-const aylien = new aylienAPI({
-  application_id: process.env.API_ID,
-  application_key: process.env.API_KEY,
-});
 
 let json = {
   title: "test json response",
@@ -62,14 +63,86 @@ app.listen(port, function () {
 console.log(`Your API KEY is ${process.env.API_KEY}`);
 console.log(`Your APP ID key is ${process.env.API_ID}`);
 
+let urlTest =
+  "https://www.woodsbagot.com/news/woods-bagots-facade-automation-workflow-named-a-finalist-in-fast-companys-2019-innovation-by-design-awards/";
+// "https://jamesclear.com/creativity"
+// "https://jamesclear.com/creativity"
+// 'http://techcrunch.com/2015/04/06/john-oliver-just-changed-the-surveillance-reform-debate'
+/*
 aylien.sentiment(
   {
     // text: "John is bad!",
-    url: "https://jamesclear.com/creativity",
+    url: urlTest,
   },
   function (error, response) {
     if (error === null) {
       console.log(response);
+    }
+  }
+);
+
+aylien.hashtags(
+  {
+    url: urlTest,
+  },
+  function (error, response) {
+    if (error === null) {
+      console.log(response.hashtags);
+    }
+  }
+);
+
+aylien.summarize(
+  {
+    url: urlTest,
+    sentences_number: 1,
+   
+  },
+  function (error, response) {
+    if (error === null) {
+      response.sentences.forEach(function (s) {
+        console.log(s);
+      });
+    }
+  }
+);
+
+
+aylien.entities({
+  url:urlTest,
+}, function(error, response) {
+  if (error === null) {
+    Object.keys(response.entities).forEach(function(e) {
+      console.log(e + ": " + response.entities[e].join(","));
+    });
+  }
+});
+*/
+
+
+aylien.combined(
+  {
+    
+    url: urlTest,
+    endpoint: [
+      "sentiment",
+      "extract",
+      "summarize",
+      "concepts",
+      "entities",
+      "language",
+      "hashtags",
+      "classify",
+    ],
+  },
+  function (err, result) {
+    if (err === null) {
+      result.results.forEach(function (r) {
+        console.log("\n--------\n", r.endpoint + ":");
+        console.log(r.result, "\n--------\n");
+      });
+    } else {
+      console.log(err);
     }
   }
 );

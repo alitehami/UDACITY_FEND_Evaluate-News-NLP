@@ -14,3 +14,15 @@ import "./styles/header.scss";
 // alert("I EXIST");
 
 export { handleSubmit, melbourneWeather, checkText_isURL };
+
+const dom_testTextArea = document.querySelector("#testText");
+const dom_submitAnalysis = document.querySelector("form > input[type=submit]");
+
+dom_testTextArea.addEventListener("input", () => {
+  let check = checkText_isURL(dom_testTextArea.value);
+  if (check) {
+    dom_submitAnalysis.value = "Analyze this Link..";
+  } else {
+    dom_submitAnalysis.value = "Analyze this Text blob..";
+  }
+});
