@@ -2,7 +2,7 @@
 <html lang="en" dir="ltr">
     <head>
         <meta charset="utf-8">
-        <title>Test</title>
+        <title>NLP Text Analyzer</title>
     </head>
 
     <body>
@@ -16,10 +16,14 @@
             </div>
         </header>
 
+        <h1 id="headline">NATURAL LANGUAGE PROCESSING<br>OF TEXT OR WEB ARTICLES</h1>
+
         <main>
             <section>
                 <form class="" onsubmit="return Client.handleSubmit(event)">
-                    <input id="name" type="text" name="input" value="" onblur="onBlur()" placeholder="Name">
+                    <!-- <input id="name" type="text" name="input" value="" onblur="onBlur()" placeholder="Name"> -->
+                    <textarea id= "testText" name="input" 
+                    placeholder="Hello!! type some text here.. or drop a web link.."></textarea>
                     <input type="submit" name="" value="Analyze" onclick="return Client.handleSubmit(event)" onsubmit="return Client.handleSubmit(event)">
                 </form>
             <section>

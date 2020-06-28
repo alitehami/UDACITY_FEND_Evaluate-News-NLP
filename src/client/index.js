@@ -1,4 +1,4 @@
-import { checkForName } from "./js/nameChecker";
+import { checkText_isURL } from "./js/nameChecker";
 import { handleSubmit } from "./js/formHandler";
 import { melbourneWeather } from "./js/openWeatherMap";
 import "./js/networkStatus";
@@ -9,8 +9,8 @@ import "./styles/form.scss";
 import "./styles/footer.scss";
 import "./styles/header.scss";
 
-console.log(checkForName);
+// console.log(checkForName);
 
 // alert("I EXIST");
 
-export { checkForName, handleSubmit, melbourneWeather };
+export { handleSubmit, melbourneWeather, checkText_isURL };
