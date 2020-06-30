@@ -1,0 +1,140 @@
+const dotenv = require("dotenv").config();
+const path = require("path");
+const express = require("express");
+const mockAPIResponse = require("./mockAPI.js");
+const { url } = require("inspector");
+const bodyParser = require("body-parser");
+const cors = require("cors");
+const getAylienAnalysis = require("./aylienAPI.js");
+
+
+let port = process.env.PORT;
+
+let projectData = [];
+
+let json = {
+  title: "test json response",
+  message: "this is a message",
+  time: "now",
+};
+
+const app = express();
+app.use(cors());
+// to use json
+app.use(bodyParser.json());
+// to use url encoded values
+app.use(
+  bodyParser.urlencoded({
+    extended: true,
+  })
+);
+
+app.use(express.static("dist"));
+
+console.log(JSON.stringify(mockAPIResponse));
+
+app.get("/", function (req, res) {
+  res.sendFile("dist/index.html");
+});
+
+app.get("/test", function (req, res) {
+  res.json(mockAPIResponse);
+});
+
+// app.get("/owmMelbourne", (request, response) => {
+//   owmAPIResponse().then((x) => {
+//     console.log("GET owm melbourne recieved....");
+//     console.log(x);
+//     response.json(x);
+//   });
+// });
+
+
+const x =
+  "\n---------------------------------------------------------------------------------\n";
+
+//sending last entry data back to the front-end
+app.get("/getLastEntry", async (request, response) => {
+  try {
+    let i = projectData.length;
+    console.log(`\nGET REQUEST FOR LAST ENTRY\nall recorded entries (${i}):`);
+    let sendData = false;
+    if (i !== 0) {
+      sendData = projectData[i - 1];
+    }
+
+    //debug check for all entries
+    projectData.forEach((x) => {
+      console.log(x);
+    });
+    console.log("-----");
+    console.log(x, JSON.stringify(sendData), x);
+    response.send(sendData);
+  } catch (error) {
+    console.error(error);
+    response.send(`failed! ${error.message}`);
+  }
+});
+
+app.post("/aylienPOST", async (request, response) => {
+  let req = await request.body;
+  console.log(`----\nNew Entry Recieved`);
+  console.log(req);
+  const result = await getAylienAnalysis(req);
+  let j = await result;
+  console.log(j);
+  console.log(x, JSON.stringify(result), x);
+  // projectData.push(req.nlp);
+  response.send("success!");
+  // response.json(req.nlp);
+  // console.log(req);
+  // console.log(x, JSON.stringify(projectData), x);
+});
+
+// app.post("/aylienPOST", async (request, response) => {
+//   let req = await request.body;
+//   console.log(`----\nNew Entry Recieved`);
+//   console.log(req);
+//   const result = await getAylienAnalysis(req).then((getData) => {
+//     req.nlp = getData;
+//     projectData.push(req);
+//     // response.send("success!");
+//     response.send(req.nlp);
+
+//     console.log(req);
+//   });
+//   // console.log(x, JSON.stringify(projectData[0]), x);
+// });
+
+// app.post("/aylienPOST", async (request, response) => {
+//   let req = await request.body;
+//   console.log(`----\nNew Entry Recieved`);
+//   console.log(req);
+//   try {
+//     const getData = await getAylienAnalysis(req)
+//       .then((results) => {
+//         req.nlp = results;
+//         projectData.push(results);
+//         response.send("success!");
+//       })
+//       .then(console.log(req));
+//   } catch (error) {
+//     console.error(error);
+//     response.send(`failed! ${error.message}`);
+//   }
+//   console.log(`----\nNew Entry Recieved`);
+//   // console.log(x, JSON.stringify(projectData[0]), x);
+// });
+
+// designates what port the app will listen to for incoming requests
+app.listen(port, function () {
+  console.log(`Example app listening on http://localhost:${port}`);
+});
+
+console.log(`Your API KEY is ${process.env.API_KEY}`);
+console.log(`Your APP ID key is ${process.env.API_ID}`);
+
+let t =
+  "https://www.woodsbagot.com/news/woods-bagots-facade-automation-workflow-named-a-finalist-in-fast-companys-2019-innovation-by-design-awards/";
+
+// getAylienAnalysis({ urlTest: "", textTest: "Hello, how are you my friend, i love you!!" });

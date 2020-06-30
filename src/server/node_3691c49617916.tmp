@@ -35,14 +35,24 @@ app.use(
 );
 
 app.use(express.static("dist"));
-// spin up the server
-app.listen(port, function () {
-  console.log(`Example app listening on http://localhost:${port}`);
-});
+
+console.log(JSON.stringify(mockAPIResponse));
 
 app.get("/", function (req, res) {
   res.sendFile("dist/index.html");
 });
+
+app.get("/test", function (req, res) {
+  res.json(mockAPIResponse);
+});
+
+// app.get("/owmMelbourne", (request, response) => {
+//   owmAPIResponse().then((x) => {
+//     console.log("GET owm melbourne recieved....");
+//     console.log(x);
+//     response.json(x);
+//   });
+// });
 
 const x =
   "\n---------------------------------------------------------------------------------\n";
@@ -56,6 +66,7 @@ app.get("/getLastEntry", async (request, response) => {
     if (i !== 0) {
       sendData = projectData[i - 1];
     }
+
     //debug check for all entries
     projectData.forEach((x) => {
       console.log(x);
@@ -74,7 +85,15 @@ app.post("/aylienPOST", async (request, response) => {
   console.log(`----\nNew Entry Recieved\n`);
   // console.log(req);
   const x = await getAylienAnalysis(req);
+  // const resu = await JSON.stringify(x);
+  // console.log(resu);
+  console.log(x, projectData, x);
   response.send("success!");
+});
+
+// spin up the server
+app.listen(port, function () {
+  console.log(`Example app listening on http://localhost:${port}`);
 });
 
 console.log(`Your API KEY is ${process.env.API_KEY}`);

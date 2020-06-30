@@ -28,18 +28,27 @@ function getAylienAnalysis(req) {
   } else {
     data.url = req.urlTest;
   }
-  // console.log("logging the data input:\n-----\n", data);
-  let analysisResult = null;
-  aylien.combined(data, async (err, result) => {
+
+  let analysisResult;
+  aylien.combined(data, async function (err, result) {
     if (err === null) {
-      analysisResult = await result;
+      // result.results.forEach(function (r) {
+      //   console.log("\n--------\n", r.endpoint + ":");
+      //   console.log(r.result, "\n--------\n");
+      // });
+      let convert = await JSON.stringify(result.results);
       
+      analysisResult =  convert;
+      // console.log(result);
     } else {
       console.log(err);
     }
-    // console.log("\n-----\nlogging the results:\n-----\n", analysisResult);
-    // return analysisResult;
-  })
+  });
+  console.log(analysisResult);
+  return analysisResult;
 }
 
-// module.exports = getAylienAnalysis;
+module.exports = getAylienAnalysis;
+
+let urlTest =
+  "https://www.woodsbagot.com/news/woods-bagots-facade-automation-workflow-named-a-finalist-in-fast-companys-2019-innovation-by-design-awards/";
