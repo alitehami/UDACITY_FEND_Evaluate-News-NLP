@@ -1,3 +1,6 @@
+let t =
+  "https://www.woodsbagot.com/news/woods-bagots-facade-automation-workflow-named-a-finalist-in-fast-companys-2019-innovation-by-design-awards/";
+
 //red
 /* Function to POST data */
 const postData = async (url = "", data = {}) => {
@@ -11,10 +14,10 @@ const postData = async (url = "", data = {}) => {
       },
       body: JSON.stringify(data),
     });
-    const content = await response.json();
-    return content;
+    // const content = await response.json();
+    // return content;
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 };
 //
@@ -27,7 +30,7 @@ const getData = async (url = "") => {
     const collect = await response.json();
     return collect;
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 };
 //
@@ -50,18 +53,16 @@ function handleSubmit(event) {
       dataRequest.textTest = formText;
     }
     console.log("::: Form Submitted :::");
-    postData("http://localhost:8081/aylienPOST", dataRequest).then((r) => {
-      console.log(r);
-    });
-
-    
-    fetch("http://localhost:8081/test")
-      .then((res) => {
-        return res;
-      })
-      .then(function (data) {
-        document.getElementById("results").innerHTML = data.message;
-      });
+    //double fetch(), POST & GET requests.
+    (async () => {
+      const post = await postData(
+        "http://localhost:8081/aylienPOST",
+        dataRequest
+      );
+      const data = await getData("http://localhost:8081/getLastEntry");
+      console.log(data);
+      document.getElementById("results").innerHTML = data.dataArray[0];
+    })();
   } else {
     event.target.value = "Give me something to think about!!";
   }

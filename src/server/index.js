@@ -1,27 +1,21 @@
 const dotenv = require("dotenv").config();
 const path = require("path");
 const express = require("express");
-const mockAPIResponse = require("./mockAPI.js");
-const { url } = require("inspector");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const { url } = require("inspector");
 const aylienAPI = require("aylien_textapi");
 
 const aylien = new aylienAPI({
   application_id: process.env.API_ID,
   application_key: process.env.API_KEY,
 });
-// const getAylienAnalysis = require("./aylienAPI.js");
 
 let port = process.env.PORT;
+console.log(`Your API KEY is ${process.env.API_KEY}`);
+console.log(`Your APP ID key is ${process.env.API_ID}`);
 
 let projectData = [];
-
-let json = {
-  title: "test json response",
-  message: "this is a message",
-  time: "now",
-};
 
 const app = express();
 app.use(cors());
@@ -35,55 +29,37 @@ app.use(
 );
 
 app.use(express.static("dist"));
+
 // spin up the server
 app.listen(port, function () {
-  console.log(`Example app listening on http://localhost:${port}`);
+  console.log(`the app is listening on http://localhost:${port}`);
 });
 
 app.get("/", function (req, res) {
-  res.sendFile("dist/index.html");
+  res.sendFile("dist/");
 });
+
 
 const x =
   "\n---------------------------------------------------------------------------------\n";
 
-//sending last entry data back to the front-end
-app.get("/getLastEntry", async (request, response) => {
-  try {
-    let i = projectData.length;
-    console.log(`\nGET REQUEST FOR LAST ENTRY\nall recorded entries (${i}):`);
-    let sendData = false;
-    if (i !== 0) {
-      sendData = projectData[i - 1];
-    }
-    //debug check for all entries
-    projectData.forEach((x) => {
-      console.log(x);
-    });
-    console.log("-----");
-    console.log(x, JSON.stringify(sendData), x);
-    response.send(sendData);
-  } catch (error) {
-    console.error(error);
-    response.send(`failed! ${error.message}`);
-  }
-});
-
 app.post("/aylienPOST", async (request, response) => {
   let req = await request.body;
   console.log(`----\nNew Entry Recieved\n`);
-  // console.log(req);
-  const x = await getAylienAnalysis(req);
-  response.send("success!");
+
+  try {
+    const x = await getAylienAnalysis(req);
+    (async () => {
+      await console.log(x);
+    })();
+    console.log("passed aylien call function...");
+    response.send("success!");
+  } catch (err) {
+    console.log("failed aylien call function...");
+    console.error(err);
+    response.send(`error occured:\n${err}`);
+  }
 });
-
-console.log(`Your API KEY is ${process.env.API_KEY}`);
-console.log(`Your APP ID key is ${process.env.API_ID}`);
-
-let t =
-  "https://www.woodsbagot.com/news/woods-bagots-facade-automation-workflow-named-a-finalist-in-fast-companys-2019-innovation-by-design-awards/";
-
-// getAylienAnalysis({ urlTest: "", textTest: "Hello, how are you my friend, i love you!!" });
 
 function getAylienAnalysis(req) {
   let data = {
@@ -104,17 +80,100 @@ function getAylienAnalysis(req) {
   } else {
     data.url = req.urlTest;
   }
-  // console.log("logging the data input:\n-----\n", data);
+  console.log("logging the data input:\n-----\n", data);
   let analysisResult = null;
   aylien.combined(data, async (err, result) => {
     if (err === null) {
       analysisResult = await result;
       projectData.push(analysisResult);
-      // console.log("\n-----\nlogging the results:\n-----\n", analysisResult);
+      console.log("\n-----\nlogging the results:\n-----\n", analysisResult);
+      return analysisResult;
     } else {
+      console.log("ERRORRRROROROROR.......");
       console.log(err);
+      return err;
     }
   });
 }
 
+//sending last entry data back to the front-end
+app.get("/getLastEntry", async (request, response) => {
+  try {
+    let i = projectData.length;
+    console.log(`\nGET REQUEST FOR LAST ENTRY\nall recorded entries (${i}):`);
+    let sendData = false;
+    if (i !== 0) {
+      sendData = projectData[i - 1];
+    }
+    // console.log("-----");
+    // console.log(x, JSON.stringify(sendData), x);
+    response.send(dataCleaner(sendData, "sentiment"));
+  } catch (error) {
+    console.error(error);
+    response.send(`failed! ${error.message}`);
+  }
+});
 
+//a great handy tool to help navigating & generating the json response attribute paths
+//https://jsonpathfinder.com/
+
+//Cleaninig up the Aylien api response
+function dataCleaner(json, endpointType) {
+  if (!json) {
+    return {};
+  }
+  console.log(json, "this is it!");
+  const data = json.results;
+  const dataArray = [];
+  data.forEach((d) => {
+    console.log(`endpoint is ${d.endpoint}`);
+    if (endpointType === d.endpoint) {
+      let format = null;
+      let i = d.result;
+
+      switch (d.endpoint) {
+        case "sentiment":
+          let perc =
+            parseFloat(i.polarity_confidence) >= 0.5
+              ? "is most likely"
+              : "might be";
+          format = `The Tone of this text ${perc} ${i.polarity}<br><br>The Text is:<br>${json.text}<br><br><hr><br><br>${JSON.stringify(json.results)}`;
+          dataArray.push(format);
+          // code block
+          break;
+
+        case "extract":
+          // code block
+          break;
+
+        case "summarize":
+          //
+          break;
+
+        case "concepts":
+          //
+          break;
+
+        case "entities":
+          //
+          break;
+
+        case "language":
+          //
+          break;
+
+        case "hashtags":
+          //
+          break;
+
+        case "classify":
+          //
+          break;
+
+        default:
+          false;
+      }
+    }
+  });
+  return { dataArray };
+}
