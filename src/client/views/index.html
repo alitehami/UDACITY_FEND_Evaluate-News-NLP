@@ -24,7 +24,8 @@
                     <!-- <input id="name" type="text" name="input" value="" onblur="onBlur()" placeholder="Name"> -->
                     <textarea id= "testText" name="input" 
                     placeholder="Hello!! type some text here.. or drop a web link.."></textarea>
-                    <input type="submit" name="" value="Analyze" onclick="return Client.handleSubmit(event)" onsubmit="return Client.handleSubmit(event)">
+                    <input type="submit" name="submit" value="Analyze" onclick="return Client.handleSubmit(event)" onsubmit="return Client.handleSubmit(event)">
+                    <input type="button" name="last" value="Show me the Last result" onclick="return Client.handleGetLast(event)" onsubmit="return Client.handleGetLast(event)">
                 </form>
             <section>
 
@@ -46,7 +47,7 @@
         </footer>
 
 
-        <!-- <script>
+        <script>
             // Check that service workers are supported
             if ('serviceWorker' in navigator) {
                 // Use the window load event to keep the page load performant
@@ -54,7 +55,7 @@
                     navigator.serviceWorker.register('/service-worker.js');
                 });
             }
-           </script> -->
+           </script>
 
 
     </body>

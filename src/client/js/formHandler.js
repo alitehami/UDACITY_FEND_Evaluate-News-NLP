@@ -1,6 +1,3 @@
-let t =
-  "https://www.woodsbagot.com/news/woods-bagots-facade-automation-workflow-named-a-finalist-in-fast-companys-2019-innovation-by-design-awards/";
-
 /* Function to POST data */
 const postData = async (url = "", data = {}) => {
   console.log(data);
@@ -32,8 +29,12 @@ const getData = async (url = "") => {
   }
 };
 
+//loading html text:
+const loading = `<h1 style="text-align: center; font-size:2em;"> >>>>> LOADING <<<<< <h1>`;
+
 function handleSubmit(event) {
   event.preventDefault();
+  const dom_container = document.getElementById("results");
 
   // check what text was put into the form field
   let formText = document.getElementById("testText").value;
@@ -50,17 +51,33 @@ function handleSubmit(event) {
       dataRequest.textTest = formText;
     }
     console.log("::: Form Submitted :::");
+    dom_container.innerHTML = loading;
     (async () => {
       const result = await postData(
-        "http://localhost:8081/aylienPOST",
+        "/aylienPOST",
         dataRequest
       );
-      console.log("results here\n",result.dataArray[0]);
-      document.getElementById("results").innerHTML = result.dataArray[0];
+      console.log("results here\n", result.dataArray);
+      let allResults = "";
+      result.dataArray.forEach((d) => (allResults += d[0]));
+      dom_container.innerHTML = allResults;
     })();
   } else {
     event.target.value = "Give me something to think about!!";
   }
 }
+function handleGetLast(event) {
+  event.preventDefault();
+  const dom_container = document.getElementById("results");
+  dom_container.innerHTML = loading;
+  console.log("::: LAST RESULT REQUEST :::");
+  (async () => {
+    const result = await getData("/getLastEntry");
+    console.log("results here\n", result.dataArray);
+    let allResults = "";
+    result.dataArray.forEach((d) => (allResults += d[0]));
+    dom_container.innerHTML = allResults;
+  })();
+}
 
-export { handleSubmit };
+export { handleSubmit, handleGetLast };

@@ -1,6 +1,6 @@
 import { checkText_isURL } from "./js/nameChecker";
 import { handleSubmit } from "./js/formHandler";
-// import { melbourneWeather } from "./js/openWeatherMap";
+import { handleGetLast } from "./js/formHandler";
 import "./js/networkStatus";
 
 import "./styles/resets.scss";
@@ -9,11 +9,7 @@ import "./styles/form.scss";
 import "./styles/footer.scss";
 import "./styles/header.scss";
 
-// console.log(checkForName);
-
-// alert("I EXIST");
-
-export { handleSubmit, checkText_isURL };
+export { handleSubmit, checkText_isURL, handleGetLast };
 
 const dom_testTextArea = document.querySelector("#testText");
 const dom_submitAnalysis = document.querySelector("form > input[type=submit]");

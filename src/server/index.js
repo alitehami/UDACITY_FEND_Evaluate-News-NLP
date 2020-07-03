@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const { url } = require("inspector");
 const aylienAPI = require("aylien_textapi");
+const dataCleaner = require("./dataCleaner.js");
 
 const aylien = new aylienAPI({
   application_id: process.env.API_ID,
@@ -12,7 +13,6 @@ const aylien = new aylienAPI({
 });
 
 let port = process.env.PORT;
-
 console.log(`Your API KEY is ${process.env.API_KEY}`);
 console.log(`Your APP ID key is ${process.env.API_ID}`);
 
@@ -43,25 +43,25 @@ app.get("/", function (req, res) {
 const x =
   "\n---------------------------------------------------------------------------------\n";
 
+//the desired endpoints & formatting order of the aylien combined api call
+const aylienEndPointsArray = [
+  "sentiment",
+  "language",
+  "summarize",
+  "classify",
+  "entities",
+  "hashtags",
+  "concepts",
+  "extract",
+];
+
 app.post("/aylienPOST", async (request, response) => {
   let req = request.body;
-  console.log(`----\nNew Entry Recieved\n`);
+  console.log(`${x}\nNew Entry Recieved\n`);
 
   try {
-    // const x =  getAylienAnalysis(req);
-    ////////////////////////////////////////////////////
-
     let data = {
-      endpoint: [
-        "sentiment",
-        "extract",
-        "summarize",
-        "concepts",
-        "entities",
-        "language",
-        "hashtags",
-        "classify",
-      ],
+      endpoint: aylienEndPointsArray,
     };
     // check for url or text input
     if (req.textTest) {
@@ -75,16 +75,20 @@ app.post("/aylienPOST", async (request, response) => {
         let analysisResult = await result;
         projectData.push(analysisResult);
         console.log("\n-----\nlogging the results:\n-----\n", analysisResult);
-        response.send(dataCleaner(analysisResult, "sentiment"));
+        response.send(getAllCleanData(analysisResult));
       } else {
-        console.log("ERRORRRROROROROR.......");
+        console.log(".......AN ERROR HAS OCCURRED.......");
         console.log(err);
-        response.send({dataArray:[`Error:<br>${err}`]});
+        response.send({
+          dataArray: [
+            [
+              `<h2 style="text-align: center;">.......AN ERROR HAS OCCURRED.......<h2><br>${err}`,
+            ],
+          ],
+        });
         return err;
       }
     });
-
-    /////////////////////////////////////
   } catch (err) {
     console.log("failed aylien call function...");
     console.error(err);
@@ -101,78 +105,102 @@ app.get("/getLastEntry", async (request, response) => {
     if (i !== 0) {
       sendData = projectData[i - 1];
     }
-    // console.log("-----");
-    // console.log(x, JSON.stringify(sendData), x);
-    response.send(sendData);
+    console.log("-----");
+    console.log(x, JSON.stringify(sendData), x);
+    if (sendData) {
+      // response.send(dataCleaner(sendData, "sentiment"));
+      response.send(JSON.stringify(getAllCleanData(sendData)));
+    } else {
+      response.send({
+        dataArray: [
+          [`<h2 style="text-align: center;">.......NO RECORDS YET.......<h2>`],
+        ],
+      });
+    }
   } catch (error) {
     console.error(error);
-    response.send(`failed! ${error.message}`);
+    response.send({
+      dataArray: [
+        `<h2 style="text-align: center;">.......AN ERROR HAS OCCURRED.......<h2><br>${error}`,
+      ],
+    });
   }
 });
 
-//a great handy tool to help navigating & generating the json response attribute paths
-//https://jsonpathfinder.com/
-//Cleaninig up the Aylien api response
-function dataCleaner(json, endpointType) {
-  if (!json) {
-    return {};
-  }
-  console.log(json, "this is it!");
-  const data = json.results;
-  const dataArray = [];
-  data.forEach((d) => {
-    if (endpointType === d.endpoint) {
-      console.log(`endpoint is ${d.endpoint}`);
-      let format = null;
-      let i = d.result;
+const testResult = {
+  text: "ali",
+  results: [
+    {
+      endpoint: "extract",
+      result: {
+        author: "",
+        image: "",
+        tags: [],
+        article: "ali",
+        videos: [],
+        title: "",
+        publishDate: "",
+        feeds: [],
+      },
+    },
+    {
+      endpoint: "language",
+      result: { lang: "it", confidence: 0.9999922738613526 },
+    },
+    { endpoint: "entities", result: { language: "it", entities: {} } },
+    {
+      endpoint: "concepts",
+      result: {
+        language: "it",
+        concepts: {
+          "http://it.dbpedia.org/resource/Ala_degli_insetti": {
+            surfaceForms: [
+              { string: "ali", score: 0.47585994005203247, offset: 0 },
+            ],
+            types: [],
+            support: 1346,
+          },
+        },
+      },
+    },
+    {
+      endpoint: "classify",
+      result: {
+        language: "en",
+        categories: [
+          {
+            label: "religious festival or holiday - easter",
+            code: "12014002",
+            confidence: 0.87,
+          },
+        ],
+      },
+    },
+    {
+      endpoint: "hashtags",
+      result: { language: "it", hashtags: ["#AlaDegliInsetti"] },
+    },
+    {
+      endpoint: "sentiment",
+      result: {
+        polarity: "positive",
+        subjectivity: "unknown",
+        polarity_confidence: 0.6446927785873413,
+        subjectivity_confidence: 0,
+      },
+    },
+    { endpoint: "summarize", result: { sentences: [] } },
+  ],
+};
 
-      switch (d.endpoint) {
-        case "sentiment":
-          let perc =
-            parseFloat(i.polarity_confidence) >= 0.5
-              ? "is most likely"
-              : "might be";
-          format = `The Tone of this text ${perc} ${
-            i.polarity
-          }<br><br>The Text is:<br>${
-            json.text
-          }<br><br><hr><br><br>${JSON.stringify(json.results)}`;
-          dataArray.push(format);
-          // code block
-          break;
-
-        case "extract":
-          // code block
-          break;
-
-        case "summarize":
-          //
-          break;
-
-        case "concepts":
-          //
-          break;
-
-        case "entities":
-          //
-          break;
-
-        case "language":
-          //
-          break;
-
-        case "hashtags":
-          //
-          break;
-
-        case "classify":
-          //
-          break;
-
-        default:
-          false;
-      }
-    }
-  });
-  return { dataArray };
-}
+//get a formatted HTML text for all the endpoints
+const getAllCleanData = (testResult) => {
+  console.log("------------", "\nprocessing the text...\n");
+  let out = [];
+  [...aylienEndPointsArray, "raw"].forEach((e) =>
+    out.push(dataCleaner(testResult, e))
+  );
+  // console.log(out);
+  console.log(x);
+  return { dataArray: out };
+};
