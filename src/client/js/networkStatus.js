@@ -21,3 +21,5 @@ window.addEventListener("online", () => {
 window.addEventListener("offline", () => {
   changeStatus(false);
 });
+
+export { changeStatus };

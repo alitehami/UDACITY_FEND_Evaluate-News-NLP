@@ -12,6 +12,7 @@ const aylien = new aylienAPI({
 });
 
 let port = process.env.PORT;
+
 console.log(`Your API KEY is ${process.env.API_KEY}`);
 console.log(`Your APP ID key is ${process.env.API_ID}`);
 
@@ -39,60 +40,57 @@ app.get("/", function (req, res) {
   res.sendFile("dist/");
 });
 
-
 const x =
   "\n---------------------------------------------------------------------------------\n";
 
 app.post("/aylienPOST", async (request, response) => {
-  let req = await request.body;
+  let req = request.body;
   console.log(`----\nNew Entry Recieved\n`);
 
   try {
-    const x = await getAylienAnalysis(req);
-    console.log("passed aylien call function...");
-    response.send("Success!");
-    return x;
+    // const x =  getAylienAnalysis(req);
+    ////////////////////////////////////////////////////
+
+    let data = {
+      endpoint: [
+        "sentiment",
+        "extract",
+        "summarize",
+        "concepts",
+        "entities",
+        "language",
+        "hashtags",
+        "classify",
+      ],
+    };
+    // check for url or text input
+    if (req.textTest) {
+      data.text = req.textTest;
+    } else {
+      data.url = req.urlTest;
+    }
+    console.log("logging the data input:\n-----\n", data);
+    aylien.combined(data, async (err, result) => {
+      if (err === null) {
+        let analysisResult = await result;
+        projectData.push(analysisResult);
+        console.log("\n-----\nlogging the results:\n-----\n", analysisResult);
+        response.send(dataCleaner(analysisResult, "sentiment"));
+      } else {
+        console.log("ERRORRRROROROROR.......");
+        console.log(err);
+        response.send({dataArray:[`Error:<br>${err}`]});
+        return err;
+      }
+    });
+
+    /////////////////////////////////////
   } catch (err) {
     console.log("failed aylien call function...");
     console.error(err);
     response.send(`error occured:\n${err}`);
   }
 });
-
-function getAylienAnalysis(req) {
-  let data = {
-    endpoint: [
-      "sentiment",
-      "extract",
-      "summarize",
-      "concepts",
-      "entities",
-      "language",
-      "hashtags",
-      "classify",
-    ],
-  };
-  // check for url or text input
-  if (req.textTest) {
-    data.text = req.textTest;
-  } else {
-    data.url = req.urlTest;
-  }
-  console.log("logging the data input:\n-----\n", data);
-  let analysisResult = null;
-  aylien.combined(data, async (err, result) => {
-    if (err === null) {
-      analysisResult = await result;
-      projectData.push(analysisResult);
-      console.log("\n-----\nlogging the results:\n-----\n", analysisResult);
-      return analysisResult;
-    } else {
-      console.log("ERRORRRROROROROR.......");
-      console.log(err);
-      return err;
-    }
-  });
-}
 
 //sending last entry data back to the front-end
 app.get("/getLastEntry", async (request, response) => {
@@ -105,7 +103,7 @@ app.get("/getLastEntry", async (request, response) => {
     }
     // console.log("-----");
     // console.log(x, JSON.stringify(sendData), x);
-    response.send(dataCleaner(sendData, "sentiment"));
+    response.send(sendData);
   } catch (error) {
     console.error(error);
     response.send(`failed! ${error.message}`);
@@ -114,7 +112,6 @@ app.get("/getLastEntry", async (request, response) => {
 
 //a great handy tool to help navigating & generating the json response attribute paths
 //https://jsonpathfinder.com/
-
 //Cleaninig up the Aylien api response
 function dataCleaner(json, endpointType) {
   if (!json) {
@@ -135,7 +132,11 @@ function dataCleaner(json, endpointType) {
             parseFloat(i.polarity_confidence) >= 0.5
               ? "is most likely"
               : "might be";
-          format = `The Tone of this text ${perc} ${i.polarity}<br><br>The Text is:<br>${json.text}<br><br><hr><br><br>${JSON.stringify(json.results)}`;
+          format = `The Tone of this text ${perc} ${
+            i.polarity
+          }<br><br>The Text is:<br>${
+            json.text
+          }<br><br><hr><br><br>${JSON.stringify(json.results)}`;
           dataArray.push(format);
           // code block
           break;
