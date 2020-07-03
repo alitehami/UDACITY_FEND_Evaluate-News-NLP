@@ -49,11 +49,9 @@ app.post("/aylienPOST", async (request, response) => {
 
   try {
     const x = await getAylienAnalysis(req);
-    (async () => {
-      await console.log(x);
-    })();
     console.log("passed aylien call function...");
-    response.send("success!");
+    response.send("Success!");
+    return x;
   } catch (err) {
     console.log("failed aylien call function...");
     console.error(err);
@@ -126,8 +124,8 @@ function dataCleaner(json, endpointType) {
   const data = json.results;
   const dataArray = [];
   data.forEach((d) => {
-    console.log(`endpoint is ${d.endpoint}`);
     if (endpointType === d.endpoint) {
+      console.log(`endpoint is ${d.endpoint}`);
       let format = null;
       let i = d.result;
 
