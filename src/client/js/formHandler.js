@@ -1,6 +1,3 @@
-//testing article link
-"https://www.woodsbagot.com/news/woods-bagots-facade-automation-workflow-named-a-finalist-in-fast-companys-2019-innovation-by-design-awards/";
-
 /* Function to POST data */
 const postData = async (url = "", data = {}) => {
   console.log(data);
@@ -57,7 +54,7 @@ function handleSubmit(event) {
     dom_container.innerHTML = loading;
     (async () => {
       const result = await postData(
-        "http://localhost:8081/aylienPOST",
+        "/aylienPOST",
         dataRequest
       );
       console.log("results here\n", result.dataArray);
@@ -75,7 +72,7 @@ function handleGetLast(event) {
   dom_container.innerHTML = loading;
   console.log("::: LAST RESULT REQUEST :::");
   (async () => {
-    const result = await getData("http://localhost:8081/getLastEntry");
+    const result = await getData("/getLastEntry");
     console.log("results here\n", result.dataArray);
     let allResults = "";
     result.dataArray.forEach((d) => (allResults += d[0]));

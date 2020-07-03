@@ -13,7 +13,6 @@ const aylien = new aylienAPI({
 });
 
 let port = process.env.PORT;
-
 console.log(`Your API KEY is ${process.env.API_KEY}`);
 console.log(`Your APP ID key is ${process.env.API_ID}`);
 
@@ -58,7 +57,7 @@ const aylienEndPointsArray = [
 
 app.post("/aylienPOST", async (request, response) => {
   let req = request.body;
-  console.log(`----\nNew Entry Recieved\n`);
+  console.log(`${x}\nNew Entry Recieved\n`);
 
   try {
     let data = {
@@ -194,11 +193,14 @@ const testResult = {
   ],
 };
 
+//get a formatted HTML text for all the endpoints
 const getAllCleanData = (testResult) => {
+  console.log("------------", "\nprocessing the text...\n");
   let out = [];
   [...aylienEndPointsArray, "raw"].forEach((e) =>
     out.push(dataCleaner(testResult, e))
   );
-  console.log(out);
+  // console.log(out);
+  console.log(x);
   return { dataArray: out };
 };
