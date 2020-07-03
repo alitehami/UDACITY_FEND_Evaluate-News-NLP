@@ -37,7 +37,7 @@ app.listen(port, function () {
 });
 
 app.get("/", function (req, res) {
-  res.sendFile("dist/");
+  res.sendFile(__dirname + "/dist/index.html");
 });
 
 const x =
