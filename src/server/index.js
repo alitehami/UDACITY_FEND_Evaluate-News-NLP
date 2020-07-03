@@ -29,7 +29,7 @@ app.use(
   })
 );
 
-app.use(express.static("dist"));
+app.use(express.static(__dirname + "/dist"));
 
 // spin up the server
 app.listen(port, function () {
