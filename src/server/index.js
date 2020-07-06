@@ -29,7 +29,7 @@ app.use(
   })
 );
 
-app.use(express.static("dist"));
+app.use(express.static(__dirname + "/dist"));
 
 // spin up the server
 app.listen(port, function () {
@@ -37,7 +37,7 @@ app.listen(port, function () {
 });
 
 app.get("/", function (req, res) {
-  res.sendFile("dist/");
+  res.sendFile(__dirname + "/dist/index.html");
 });
 
 const x =
